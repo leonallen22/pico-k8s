@@ -1,0 +1,70 @@
+---
+- name: Apply static IP configuration (pc0)
+  hosts: pc0
+  become: true
+  roles:
+    - configure_static_ip
+    - open_ports
+    - deps
+  vars:
+    node_type: 'controlplane'
+    static_ip: 192.168.0.137
+    netmask: 24
+    gateway: 192.168.0.1
+    dns_servers: ['8.8.8.8', '8.8.4.4']
+
+- name: Apply static IP configuration (pc1)
+  hosts: pc1
+  become: true
+  roles:
+    - configure_static_ip
+    - open_ports
+    - deps
+  vars:
+    node_type: 'workernode'
+    static_ip: 192.168.0.67
+    netmask: 24
+    gateway: 192.168.0.1
+    dns_servers: ['8.8.8.8', '8.8.4.4']
+
+- name: Apply static IP configuration (pc2)
+  hosts: pc2
+  become: true
+  roles:
+    - configure_static_ip
+    - open_ports
+    - deps
+  vars:
+    node_type: 'workernode'
+    static_ip: 192.168.0.116
+    netmask: 24
+    gateway: 192.168.0.1
+    dns_servers: ['8.8.8.8', '8.8.4.4']
+
+- name: Apply static IP configuration (pc3)
+  hosts: pc3
+  become: true
+  roles:
+    - configure_static_ip
+    - open_ports
+    - deps
+  vars:
+    node_type: 'workernode'
+    static_ip: 192.168.0.129
+    netmask: 24
+    gateway: 192.168.0.1
+    dns_servers: ['8.8.8.8', '8.8.4.4']
+
+- name: Apply static IP configuration (pc4)
+  hosts: pc4
+  become: true
+  roles:
+    - configure_static_ip
+    - open_ports
+    - deps
+  vars:
+    node_type: 'workernode'
+    static_ip: 192.168.0.214
+    netmask: 24
+    gateway: 192.168.0.1
+    dns_servers: ['8.8.8.8', '8.8.4.4']

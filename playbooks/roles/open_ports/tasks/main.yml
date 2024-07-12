@@ -1,0 +1,59 @@
+---
+- name: Ensure ufw is installed
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+  when: ansible_distribution in ['Ubuntu', 'Debian']
+
+- name: Define port range based on node type (control plane)
+  set_fact:
+    ports:
+      - "22/tcp"
+      - "6443/tcp"
+      - "2379:2380/tcp"
+      - "10250/tcp"
+      - "10259/tcp"
+      - "10257/tcp"
+  when: node_type == 'controlplane'
+
+- name: Define port range based on node type (worker node)
+  set_fact:
+    ports:
+      - "22/tcp"
+      - "10250/tcp"
+      - "10256/tcp"
+      - "30000:32767/tcp"
+  when: node_type == 'workernode'
+
+- name: Check if ports are open using ufw
+  shell: ufw status | grep '^{{ item.split("/")[0] }}.*ALLOW'
+  register: ufw_check
+  failed_when: false
+  loop: "{{ ports }}"
+  ignore_errors: true
+  changed_when: ufw_check.rc == 0
+
+- name: Set ports that are not open
+  set_fact:
+    ports_not_open: "{{ ports_not_open | default([]) + [item.item] }}"
+  when: not ansible_check_mode and item.rc != 0
+  loop: "{{ ufw_check.results }}"
+
+- name: Open ports using ufw
+  ansible.builtin.ufw:
+    rule: allow
+    port: "{{ item.split('/')[0] }}"
+    proto: "{{ item.split('/')[1] }}"
+  loop: "{{ ports_not_open }}"
+  when: not ansible_check_mode and ports_not_open is defined and ansible_distribution in ['Ubuntu', 'Debian']
+
+- name: Check if ufw is enabled
+  shell: ufw status | grep 'inactive'
+  register: ufw_enabled_check
+  failed_when: true
+  ignore_errors: true
+  changed_when: ufw_enabled_check.rc == 1
+
+- name: Enable ufw
+  ansible.builtin.command: ufw --force enable
+  when: not ufw_enabled_check.rc and ansible_distribution in ['Ubuntu', 'Debian']

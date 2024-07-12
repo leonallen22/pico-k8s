@@ -1,0 +1,26 @@
+[all]
+pc0 ansible_host=192.168.0.137
+pc1 ansible_host=192.168.0.67
+pc2 ansible_host=192.168.0.116
+pc3 ansible_host=192.168.0.129
+pc4 ansible_host=192.168.0.214
+
+[picocluster]
+pc0
+pc1
+pc2
+pc3
+pc4
+
+[controlplane]
+pc0
+
+[workernodes]
+pc1
+pc2
+pc3
+pc4
+
+[picocluster:vars]
+ansible_user=pico
+ansible_ssh_private_key_file=/home/pico/.ssh/id_rsa

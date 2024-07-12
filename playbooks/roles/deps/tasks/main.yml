@@ -1,0 +1,60 @@
+---
+- name: Add Kubernetes apt key
+  ansible.builtin.apt_key:
+    url: https://pkgs.k8s.io/core:/stable:/v1.30/deb/Release.key
+    state: present
+
+- name: Add Kubernetes apt repository to sources list
+  ansible.builtin.apt_repository:
+    repo: 'deb [signed-by=/etc/apt/trusted.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /'
+    state: present
+
+- name: Update apt package index
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install dependencies using apt (control plane)
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - gpg
+    - curl
+    - ca-certificates
+    - apt-transport-https
+    - kubectl
+    - kubelet
+    - kubeadm
+  when: node_type == 'controlplane'
+
+- name: Mark Kubernetes packages as held (control plane)
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubectl
+    - kubeadm
+  when: node_type == 'controlplane'
+
+- name: Install dependencies using apt (worker node)
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - gpg
+    - curl
+    - ca-certificates
+    - apt-transport-https
+    - kubectl
+    - kubelet
+  when: node_type == 'workernode'
+
+- name: Mark Kubernetes packages as held (worker node)
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop:
+    - kubelet
+    - kubectl
+  when: node_type == 'workernode'

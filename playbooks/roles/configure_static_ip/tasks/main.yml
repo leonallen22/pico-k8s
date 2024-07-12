@@ -1,0 +1,12 @@
+---
+- name: Install netplan if not present (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: netplan.io
+    state: present
+  when: ansible_distribution in ['Ubuntu', 'Debian']
+
+- name: Configure netplan for static IP
+  ansible.builtin.template:
+    src: netplan_static_ip.j2
+    dest: /etc/netplan/01-netcfg.yaml
+  notify: Apply netplan configuration
